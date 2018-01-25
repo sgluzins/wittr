@@ -32,6 +32,30 @@ IndexController.prototype._registerServiceWorker = function() {
     // If one arrives, track its progress.
     // If it becomes "installed", call
     // indexController._updateReady()
+
+    if(!navigator.serviceWorker.controller){
+      return;
+    }
+
+    if(reg.waiting){
+      indexController._updateReady();
+    }
+    else if(reg.installing){
+      reg.installing.addEventListener('statechange', function(state){
+        if(this.state == 'installed'){
+          indexController._updateReady();
+        }
+      })
+    }
+    else {
+      reg.addEventListener('updatefound', function(){
+        reg.installing.addEventListener('statechange', function(state) {
+          if(this.state == 'installed'){
+            indexController._updateReady();
+          }
+        });
+      });
+    }
   });
 };
 
