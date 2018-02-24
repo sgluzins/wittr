@@ -164,6 +164,50 @@ IndexController.prototype._cleanImageCache = function() {
     //
     // Open the 'wittr-content-imgs' cache, and delete any entry
     // that you no longer need.
+
+    var index = db.transaction('wittrs').objectStore('wittrs');
+    var photos = [];
+
+    return index.getAll().then(function(messages) {
+      messages.filter(function(message){
+        if(message.photo != undefined){
+          photos.push(new URL(message.photo, window.location));
+        }
+      })
+      caches.open('wittr-content-imgs').then(function(cache){
+        cache.keys().then(function(requests){
+          for(var i = 0; i < photos.length; i++){
+              if(photos[i].href != requests[i].url){
+                cache.delete(requests[i]);
+            }
+          }
+        })
+      })
+    })
+
+
+    // ANSWER FROM QUIZ
+    // var imagesNeeded = [];
+    // var tx = db.transaction('wittrs');
+    // return tx.objectStore('wittrs').getAll().then(function(){
+    //   messages.forEach(function(message){
+    //     if(message.photo){
+    //       imagesNeeded.push(message.photo);
+    //     }
+    //   })
+    // })
+
+    // return caches.open('wittr-content-imgs').then(function(cache){
+    //   return cache.keys().then(function(requests){
+    //     requests.forEach(function(request){
+    //       var url = new URL(request.url);
+    //       if(!imagesNeeded.includes(url.pathName)){
+    //         cache.delete(request);
+    //       }
+    //     })
+    //   })
+    // })
+
   });
 };
 
